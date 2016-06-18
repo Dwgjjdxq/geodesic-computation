@@ -10,4 +10,4 @@ Eigen: vector and matrix library.
 
 GLFW3: used for windowing and OpenGL contexts. 
 
-OpenGP: https://github.com/ataiya/dgp.git
+OpenGP: https://github.com/ataiya/dgp
