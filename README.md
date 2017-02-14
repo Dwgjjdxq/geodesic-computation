@@ -39,8 +39,8 @@ $./demo ${model.obj}
 
 #Result
 
-![alt tag](https://github.com/shengyangwei/geodesic-computation/images/graph.png)
+![alt tag](https://github.com/shengyangwei/geodesic-computation/blob/master/images/graph.png)
 
-![alt tag](https://github.com/shengyangwei/geodesic-computation/images/numeric.png)
+![alt tag](https://github.com/shengyangwei/geodesic-computation/blob/master/images/numeric.png)
 
 
