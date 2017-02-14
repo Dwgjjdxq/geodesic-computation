@@ -37,5 +37,10 @@ $./demo ${model.obj}
 - Standard Output
   * Display the geodesic distance between two selected points.
 
+#Result
+
+![alt tag](https://github.com/shengyangwei/geodesic-computation/images/graph.png)
+
+![alt tag](https://github.com/shengyangwei/geodesic-computation/images/numeric.png)
 
 
