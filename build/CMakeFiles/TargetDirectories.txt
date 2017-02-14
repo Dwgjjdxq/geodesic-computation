@@ -1,0 +1,4 @@
+/Users/swei/Documents/CSC586/geodesic-computation/build/CMakeFiles/edit_cache.dir
+/Users/swei/Documents/CSC586/geodesic-computation/build/CMakeFiles/rebuild_cache.dir
+/Users/swei/Documents/CSC586/geodesic-computation/build/CMakeFiles/demo.dir
+/Users/swei/Documents/CSC586/geodesic-computation/build/CMakeFiles/OPENGP.dir

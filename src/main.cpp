@@ -1,6 +1,7 @@
 
 #include<Eigen/Sparse>
 #include<OpenGP/GL/GlfwWindow.h>
+#include<OpenGP/GL/TrackballCamera.h>
 #include"SurfaceMeshRenderGeodesic.h"
 #include "GeodesicInHeat.h"
 #include "FMM.h"
@@ -34,7 +35,7 @@ struct CustomizeWindow : public GlfwWindow
 		mLogger()<<"Key 1: FMM Method\nKey 2: Heat Method(Mean)\n\nKey 3: Heat Method(Neumann)\n\nKey 4: Heat Method(Dirichlet)\n\nKey F: Set Heat Time Factor\n\nKey I : Isolines\n\nKey P : ShowPath\n\nKey R : Remove";
 	}
 
-	void key_callback(int key, int scancode, int action, int mods) override
+	bool key_callback(int key, int scancode, int action, int mods) override
 	{
 		GlfwWindow::key_callback(key, scancode, action, mods);
 
@@ -134,40 +135,60 @@ struct CustomizeWindow : public GlfwWindow
 		}
 
 		renderer.init_data();
+
+		return false;
 		
 	}
 
-	void mouse_press_callback(int button, int action, int mods) override {
+	bool  mouse_press_callback(int button, int action, int mods) override {
 		using namespace OpenGP;
 
-		if (button == GLFW_MOUSE_BUTTON_LEFT) {
-			if (action == GLFW_PRESS) {
-				double x, y;
-				glfwGetCursorPos(_window, &x, &y);
-				scene.camera.mouse_down_tumble(Vec2(x, y));
-				mouse_cliked = true;
-			}
-			else
-				mouse_cliked= false;
-		}
+   		if ((button == GLFW_MOUSE_BUTTON_LEFT) && (action == GLFW_PRESS)) {
+   			double x_window, y_window;
+        	getFramebufferCursorPos(&x_window, &y_window);
+        	Vec3 pos_window(x_window, y_window, 0.0f);
+        	Vec3 pos_clip = window_to_clip(pos_window);
+        	scene.trackball_camera.begin_rotate(pos_clip);
+        	return true;
+    	}
+
+    	if ((button == GLFW_MOUSE_BUTTON_LEFT) && (action == GLFW_RELEASE)) {
+        	scene.trackball_camera.finish_rotate();
+        	return true;
+   		}
 
 		if (button == GLFW_MOUSE_BUTTON_RIGHT) {
-			if (action == GLFW_RELEASE&&(!start||!end)) {
+			if (action == GLFW_RELEASE && (!start || !end)) {
 				double Xpos, Ypos;
 				glfwGetCursorPos(_window, &Xpos, &Ypos);
 				if (!start) {
 					UI.selectvertex(unproject_mouse(Xpos, Ypos));
 					start = true;
-					return;
+					return true;
 				}
 				if (!end) {
 					UI.selectvertex(unproject_mouse(Xpos, Ypos));
 					end = true;
-					return;
+					return true;
 				}
 			}
 		}
+
+		return false;
 	}
+
+
+OpenGP::Vec3 window_to_clip(const Vec3& pos_window) {
+    Vec3 retval;
+    retval(0) = 2.0f * static_cast<float>(pos_window(0)) / _width - 1.0f;
+    retval(1) = 1.0f - 2.0f * static_cast<float>(pos_window(1)) / _height;
+    retval(2) = 2.0f * pos_window(2) - 1.0f;
+    return retval;
+}
+
+
+
+
 
 	OpenGP::Vec3 unproject_mouse(OpenGP::Scalar xPos, OpenGP::Scalar yPos)
 	{
@@ -184,7 +205,7 @@ struct CustomizeWindow : public GlfwWindow
 		Objectz = 2.0f*zPos - 1.0f;
 		Objectw = 1.0f;
 		Vec4 near(Objectx, Objecty, Objectz, Objectw);
-		Mat4x4 U = (scene._projection*scene._view).inverse();
+		Mat4x4 U = (scene.trackball_camera.projection_matrix() * scene.trackball_camera.view_matrix()).inverse();
 		Vec4 h_point = (U*near);
 		Vec3 point(h_point[0]/h_point[3], h_point[1]/ h_point[3], h_point[2]/ h_point[3]);
 		return point;
@@ -192,13 +213,28 @@ struct CustomizeWindow : public GlfwWindow
 
 
 
-	void mouse_move_callback(double xPos, double yPos) override {
-		if (mouse_cliked)
-			scene.camera.mouse_drag_tumble(OpenGP::Vec2(xPos, yPos));
+	bool mouse_move_callback(double x_window, double y_window) override {
+		x_window *= scale_factor_retina();
+    	y_window *= scale_factor_retina();
+    
+    	bool left_down = (glfwGetMouseButton(_window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS);
+    	Vec3 pos_window(x_window, y_window, 0.0f);
+    	Vec3 pos_clip = window_to_clip(pos_window);
+
+    	bool managed = false;
+    
+    // Rotate
+    	if (left_down) {
+        	scene.trackball_camera.rotate(pos_clip);
+        	managed = true;
+	    }
+
+		return managed;	
 	}
 
-	void scroll_callback(double xOffset, double yOffset) override {
-		scene.camera.mouse_scroll((float)yOffset);
+	bool scroll_callback(double xOffset, double yOffset) override {
+		scene.trackball_camera.scale((float)yOffset);
+		return true;
 	}
 };
 

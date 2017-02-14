@@ -1,12 +1,18 @@
-get_filename_component(EXERCISENAME ${CMAKE_CURRENT_LIST_DIR} NAME)
+cmake_minimum_required(VERSION 3.0 FATAL_ERROR)
 
-file(GLOB_RECURSE SOURCES "*.cpp")
-file(GLOB_RECURSE HEADERS "*.h")
-file(GLOB_RECURSE SHADERS "*.glsl")
+project(geodesic-computation LANGUAGES CXX)
 
-add_executable(${EXERCISENAME} ${SOURCES} ${HEADERS} ${SHADERS})
-target_link_libraries(${EXERCISENAME} ${LIBRARIES})
-include_directories(internal)
+set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
-#--- Deploy data files
-file(COPY ${PROJECT_SOURCE_DIR}/data/indorelax.obj DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+include(cmake/ConfigureCompiler.cmake)
+include(cmake/ConfigureOpenGL.cmake)
+include(cmake/ConfigureGLEW.cmake)
+include(cmake/ConfigureGLFW3.cmake)
+include(cmake/ConfigureEigen3.cmake)
+include(cmake/ConfigureOpenGP.cmake)
+
+file(GLOB SOURCES "src/*.cpp")
+file(GLOB HEADERS "src/*.h")
+
+add_executable(demo ${SOURCES} ${HEADERS})
+target_link_libraries(demo ${LIBRARIES})
